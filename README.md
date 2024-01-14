@@ -191,10 +191,17 @@ $ rm /etc/systemd/system/pi-cyclone.service
 $ rm /home/stephen/cyclone.py
 ```
 
+Disable the pwm channel:
+
+```console
+$ cd /sys/class/pwm/pwmchip0/pwm3
+$ echo 0 > enable
+```
+
 Load the `pwm_fan` driver:
 
-```shell
-sudo modprobe pwm_fan
+```console
+$ sudo modprobe pwm_fan
 ```
 
 ## Resources

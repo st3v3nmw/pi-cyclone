@@ -64,28 +64,28 @@ assert (
 )
 assert 2 <= args.hysteresis <= 20
 
+with open(FAN_CTRL_DIR + "period", "r") as period_f:
+    # read the maximum duty_cycle
+    period = int(period_f.read().strip())
+
+
+class FanSpeed(Enum):
+    NO_SPIN = 0
+    LOW_SPEED = floor(0.3 * period)
+    MEDIUM_SPEED = floor(0.5 * period)
+    HIGH_SPEED = floor(0.7 * period)
+    FULL_SPEED = period
+
+
+fan_speed_thresholds = {
+    FanSpeed.LOW_SPEED.value: args.low_speed_temp,
+    FanSpeed.MEDIUM_SPEED.value: args.med_speed_temp,
+    FanSpeed.HIGH_SPEED.value: args.high_speed_temp,
+    FanSpeed.FULL_SPEED.value: args.full_speed_temp,
+}
 
 while True:
     with open(FAN_CTRL_DIR + "duty_cycle", "w+") as f:
-        with open(FAN_CTRL_DIR + "period", "r") as period_f:
-            period = int(period_f.read().strip())
-
-        class FanSpeed(Enum):
-            # https://www.raspberrypi.com/documentation/computers/raspberry-pi-5.html#cooling-raspberry-pi-5
-
-            NO_SPIN = 0
-            LOW_SPEED = floor(0.3 * period)
-            MEDIUM_SPEED = floor(0.5 * period)
-            HIGH_SPEED = floor(0.7 * period)
-            FULL_SPEED = period
-
-        fan_speed_thresholds = {
-            FanSpeed.LOW_SPEED.value: args.low_speed_temp,
-            FanSpeed.MEDIUM_SPEED.value: args.med_speed_temp,
-            FanSpeed.HIGH_SPEED.value: args.high_speed_temp,
-            FanSpeed.FULL_SPEED.value: args.full_speed_temp,
-        }
-
         result = subprocess.run(
             ["vcgencmd", "measure_temp"],
             capture_output=True,

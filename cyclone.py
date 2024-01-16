@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 import argparse
-from enum import Enum
 import logging
-from math import floor
+import os
+import pathlib
 import re
 import subprocess
+from enum import Enum
+from math import floor
 from time import sleep
 
-FAN_CTRL_DIR = "/sys/class/pwm/pwmchip0/pwm3/"
+FAN_CTRL_DIR = "/sys/class/pwm/pwmchip0/pwm3"
 
 
 logging.basicConfig(
@@ -20,6 +22,37 @@ logging.basicConfig(
         logging.StreamHandler(),
     ],
 )
+
+
+def run_cmd(cmd: str) -> subprocess.CompletedProcess:
+    proc = subprocess.run(cmd.split(), capture_output=True, text=True)
+    if proc.returncode == 0:
+        return proc
+
+    raise RuntimeError(
+        f"An error occurred while running {cmd} (exit code {proc.returncode})"
+        f"Captured Output:\n{proc.stderr}\n{proc.stdout}"
+    )
+
+
+def setup() -> None:
+    already_setup = os.path.isdir(FAN_CTRL_DIR)
+    if already_setup:
+        return
+
+    # Unload the pwm_fan driver
+    modules = run_cmd("lsmod")
+    if "pwm_fan" in modules.stdout:
+        run_cmd("rmmod pwm_fan")
+
+    # Export and activate the pwm channel
+    run_cmd("pinctrl FAN_PWM")
+    os.chdir("/sys/class/pwm/pwmchip0")
+    pathlib.Path("/sys/class/pwm/pwmchip0/export").write_text("3")
+
+    # enable the channel
+    os.chdir(FAN_CTRL_DIR)
+    pathlib.Path(f"{FAN_CTRL_DIR}/enable").write_text("1")
 
 
 parser = argparse.ArgumentParser()
@@ -64,7 +97,9 @@ assert (
 )
 assert 2 <= args.hysteresis <= 20
 
-with open(FAN_CTRL_DIR + "period", "r") as period_f:
+setup()
+
+with open(f"{FAN_CTRL_DIR}/period", "r") as period_f:
     # read the maximum duty_cycle
     period = int(period_f.read().strip())
 
@@ -85,12 +120,8 @@ fan_speed_thresholds = {
 }
 
 while True:
-    with open(FAN_CTRL_DIR + "duty_cycle", "w+") as f:
-        result = subprocess.run(
-            ["vcgencmd", "measure_temp"],
-            capture_output=True,
-            text=True,
-        )
+    with open(f"{FAN_CTRL_DIR}/duty_cycle", "w+") as f:
+        result = run_cmd("vcgencmd measure_temp")
         temperature = float(re.match(r"^temp=(\d*\.\d*)'C", result.stdout)[1])
 
         curr_state = int(f.read().strip())

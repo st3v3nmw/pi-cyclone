@@ -23,12 +23,6 @@ Here are the results while my Pi 5 4GB is idle-ish (running home assistant on Do
 
 _(most of these actions require root access)_
 
-Unload the `pwm_fan` driver:
-
-```console
-$ sudo rmmod pwm_fan
-```
-
 Install `pinctrl` from [here](https://github.com/raspberrypi/utils) if you don't have it already:
 
 ```console
@@ -39,43 +33,6 @@ $ cmake .
 $ make
 $ sudo make install
 ```
-
-You can then export and activate the pwm channel:
-
-```console
-$ pinctrl FAN_PWM
-45: a0    pd | hi // FAN_PWM/GPIO45 = PWM1_CHAN3
-$ cd /sys/class/pwm/pwmchip0
-$ echo 3 > export
-```
-
-You should now see `/sys/class/pwm/pwmchip0/pwm3`:
-
-```console
-$ cd /sys/class/pwm/pwmchip0/pwm3 && ls
-capture  duty_cycle  enable  period  polarity  power  uevent
-```
-
-Finally, you need to enable the channel:
-
-```console
-$ echo 1 > enable
-```
-
-We're now be able to control the fan speed by updating the `duty_cycle`:
-
-```console
-$ echo 10000 > duty_cycle
-```
-
-The maximum `duty_cycle` is:
-
-```console
-$ cat period
-41566
-```
-
-Credits to [this StackExchange answer](https://raspberrypi.stackexchange.com/a/145563) for the setup instructions.
 
 ## Install
 
@@ -175,6 +132,53 @@ options:
                         Hysteresis (°C)
 ```
 
+### Details
+
+The script will run the following during operation (not necessarily in order):
+
+Unload the `pwm_fan` driver:
+
+```console
+$ sudo rmmod pwm_fan
+```
+
+You can then export and activate the pwm channel:
+
+```console
+$ pinctrl FAN_PWM
+45: a0    pd | hi // FAN_PWM/GPIO45 = PWM1_CHAN3
+$ cd /sys/class/pwm/pwmchip0
+$ echo 3 > export
+```
+
+You should now see `/sys/class/pwm/pwmchip0/pwm3`:
+
+```console
+$ cd /sys/class/pwm/pwmchip0/pwm3 && ls
+capture  duty_cycle  enable  period  polarity  power  uevent
+```
+
+Finally, you need to enable the channel:
+
+```console
+$ echo 1 > enable
+```
+
+We're now be able to control the fan speed by updating the `duty_cycle`:
+
+```console
+$ echo 10000 > duty_cycle
+```
+
+The maximum `duty_cycle` is:
+
+```console
+$ cat period
+41566
+```
+
+Credits to [this StackExchange answer](https://raspberrypi.stackexchange.com/a/145563) for the setup instructions.
+
 ## Uninstall
 
 Stop & disable the service:
@@ -203,6 +207,8 @@ Load the `pwm_fan` driver:
 ```console
 $ sudo modprobe pwm_fan
 ```
+
+Restart!
 
 ## Resources
 

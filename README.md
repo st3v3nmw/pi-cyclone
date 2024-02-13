@@ -26,8 +26,8 @@ _(most of these actions require root access)_
 Install `pinctrl` from [here](https://github.com/raspberrypi/utils) if you don't have it already:
 
 ```console
-$ sudo apt-get update && sudo apt-get install build-essential
-$ git clone git@github.com:raspberrypi/utils.git
+$ sudo apt-get update && sudo apt-get install build-essential cmake
+$ git clone https://github.com/raspberrypi/utils.git
 $ cd utils/pinctrl
 $ cmake .
 $ make

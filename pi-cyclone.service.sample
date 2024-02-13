@@ -1,0 +1,15 @@
+[Unit]
+Description = Pi Cyclone
+
+[Service]
+Type = simple
+ExecStart = python3 /home/stephen/cyclone.py
+User = root
+Group = root
+Restart = on-failure
+SyslogIdentifier = pi-cyclone
+RestartSec = 5
+TimeoutStartSec = infinity
+
+[Install]
+WantedBy = multi-user.target

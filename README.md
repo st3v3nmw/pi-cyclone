@@ -6,7 +6,7 @@ At the time of writing, I'm running Ubuntu Server 23.10 and there have been
 issues integrating with the fan:
 
 1. [Fan speed control not working on Pi 5 under Ubuntu 23.10](https://bugs.launchpad.net/ubuntu/+source/linux-raspi/+bug/2041741) - Fixed
-2. [Fan toggles on/off repeatedly](https://bugs.launchpad.net/ubuntu/+source/linux-raspi/+bug/2044341) - Fix not released
+2. [Fan toggles on/off repeatedly](https://bugs.launchpad.net/ubuntu/+source/linux-raspi/+bug/2044341) - Fixed
 
 The 2nd issue means that hysteresis is not working and the fan keeps going on and off at around 50°C. With a 5°C hysteresis,
 the fan is turned on at 50°C, it runs until the Pi cools down to 45°C. Without hysteresis, the fan turns off immediately
@@ -191,7 +191,7 @@ $ sudo systemctl stop pi-cyclone
 Clean up the files:
 
 ```console
-$ rm /etc/systemd/system/pi-cyclone.service
+$ sudo rm /etc/systemd/system/pi-cyclone.service
 $ rm /home/stephen/cyclone.py
 ```
 

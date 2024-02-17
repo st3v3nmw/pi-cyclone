@@ -18,7 +18,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.DEBUG,
     handlers=[
-        logging.FileHandler("/var/log/pi-cyclone.log", mode="a"),
+        logging.FileHandler("/var/log/pi-cyclone.log", mode="w"),
         logging.StreamHandler(),
     ],
 )
